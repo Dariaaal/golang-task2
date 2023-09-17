@@ -1,12 +1,11 @@
 package main
 
 import (
-	// "encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
+	// "go.uber.org/zap"
+	// getHandler "./internal/service.go"
 )
 
 func main() {
@@ -18,12 +17,9 @@ func main() {
 	// router.Delete("/product/{id}", deleteHandler)
 	port := ":8000"
 
-	logger, _ := zap.NewProduction()
+	// logger, _ := zap.NewProduction()
 
-	logger.Error(http.ListenAndServe(port, router))
-	fmt.Println("Server is listening on port 8000...")
+	// logger.Fatal(http.ListenAndServe(port, router))
+	fmt.Printf("Server is listening on port %s...", port)
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	// json.NewEncoder(w).Encode()
-}

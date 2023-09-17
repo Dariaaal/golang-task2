@@ -1,11 +1,11 @@
-package model
+package main
 
 type Product struct {
-	ID          int     `json:"uid"`
+	ID          string     `json:"uid"`
 	Cover       []Cover `json:"cover"`
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
-	Price       int     `json:"price"`
+	Price       int    `json:"price"`
 }
 
 type Cover struct {
