@@ -3,11 +3,10 @@ package main
 import (
 	// "encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	// "go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -19,9 +18,9 @@ func main() {
 	// router.Delete("/product/{id}", deleteHandler)
 	port := ":8000"
 
-	// logger, _ := zap.NewProduction()
+	logger, _ := zap.NewProduction()
 
-	log.Fatal(http.ListenAndServe(port, router))
+	logger.Error(http.ListenAndServe(port, router))
 	fmt.Println("Server is listening on port 8000...")
 }
 
