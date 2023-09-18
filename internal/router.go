@@ -9,12 +9,19 @@ import (
 
 func GetRouter() {
 
-	logger, _ := zap.NewProduction()
+	logger, _ := zap.NewDevelopment()
 
 	logger.Debug("starting server")
 
+	productTransport := newProductTransport(logger)
+
 	router := chi.NewRouter()
-	router.Get("/product/{id}", GetProduct)
+	// router.Get("/product/{id}", productTransport.GetProduct)
+	// router.With(ProductCtx).Get(productTransport.GetProduct)
+	router.Route("/product/{id}", func(r chi.Router) {
+		r.Use(ProductCtx)            
+		r.Get("/", productTransport.GetProduct)     
+	})
 	// router.Put("/product/{id}", putHandler)
 	// router.Delete("/product/{id}", deleteHandler)
 	port := ":8000"

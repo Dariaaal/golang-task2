@@ -1,6 +1,6 @@
 package internal
 
-var products = []Product{
+var products = []*Product{
 	{
 		ID: "2",
 		Cover: []Cover{
