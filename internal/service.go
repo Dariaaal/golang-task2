@@ -1,16 +1,26 @@
-package main
+package internal
 
-import (
-	"encoding/json"
-	"log"
-	"net/http"
-)
+var cover = []Cover{
+	{
+		Url:  "http://localhost:8090/shop/demo/product_2.png",
+		Type: "photo",
+	},
+	{
+		Url:  "http://localhost:8090/shop/demo/product_9.png",
+		Type: "photo",
+	},
+	{
+		Url:  "http://localhost:8090/shop/demo/product_7.png",
+		Type: "photo",
+	},
+}
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	// json.NewEncoder(w).Encode(product)
-	js, err := json.Marshal(product)
-    if err != nil{
-        log.Fatal(err)
-	}
-    w.Write(js)
+var products = []Product{
+	{
+		ID:          "2",
+		Cover:       cover,
+		Title:       "Золоте кольє",
+		Description: "Романтичний та тендітний акцент твоїх образів.",
+		Price:       1699,
+	},
 }

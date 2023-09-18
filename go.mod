@@ -1,4 +1,4 @@
-module GitHub/golang-task2
+module github.com/dariaaal/golang-task2
 
 go 1.20
 
