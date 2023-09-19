@@ -31,27 +31,31 @@ func ProductCtx(next http.Handler) http.Handler {
 
 func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
-	productID := r.Context().Value("id").(*Product)
+	rowProductID := r.Context().Value("id")
 
-	t.log.Debug("get product", zap.String("id", productID.ID))
+    if rowProductID == nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
+	} 
+// convert to string
+	productId := string(rowProductID)
 
-	// for _, product := range products {
-	// 	if product.ID == productID.ID {
-	// 		json.NewEncoder(w).Encode(product)
-	// 	}
-	// }
+	t.log.Debug("get product", zap.String("id", rowProductID))
 
-	if productID != nil {
-		foundProduct, err := json.Marshal(products)
-		if err != nil {
-			http.Error(w, http.StatusText(400), 400)
+	for _, product := range products {
+		if product.ID == rowProductID {
+			responseData, err := json.Marshal(product)
+			if err != nil {
+				http.Error(w, http.StatusText(400), 400)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write(responseData)
 			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write(foundProduct)
+		} 
 	}
 
+	http.Error(w, http.StatusText(400), 400)
 }
 
 // func UpdateProduct(w http.ResponseWriter, r *http.Request) {
