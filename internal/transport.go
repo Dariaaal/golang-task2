@@ -37,13 +37,13 @@ func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(400), 400)
 		return
 	} 
-// convert to string
-	productId := string(rowProductID)
 
-	t.log.Debug("get product", zap.String("id", rowProductID))
+	productId := rowProductID.(string)
+
+	t.log.Debug("get product", zap.String("id", productId))
 
 	for _, product := range products {
-		if product.ID == rowProductID {
+		if product.ID == productId {
 			responseData, err := json.Marshal(product)
 			if err != nil {
 				http.Error(w, http.StatusText(400), 400)
