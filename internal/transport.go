@@ -20,10 +20,10 @@ func newProductTransport(log *zap.Logger) ProductTransport {
 	}
 }
 
-func ProductCtx(next http.Handler) http.Handler {
+func (t *ProductTransport) ProductCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        productID := chi.URLParam(r, "id")
-
+		productID := chi.URLParam(r, "productId")
+		t.log.Debug("product id", zap.String("id", productID))
 		ctx := context.WithValue(r.Context(), "id", productID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -33,10 +33,10 @@ func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	rowProductID := r.Context().Value("id")
 
-    if rowProductID == nil {
+	if rowProductID == nil {
 		http.Error(w, http.StatusText(400), 400)
 		return
-	} 
+	}
 
 	productId := rowProductID.(string)
 
@@ -52,7 +52,7 @@ func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write(responseData)
 			return
-		} 
+		}
 	}
 
 	http.Error(w, http.StatusText(400), 400)

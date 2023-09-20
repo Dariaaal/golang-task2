@@ -17,10 +17,13 @@ func GetRouter() {
 
 	router := chi.NewRouter()
 	// router.Get("/product/{id}", productTransport.GetProduct)
-	router.Route("/product/{id}", func(r chi.Router) {
-		r.Use(ProductCtx)            
-		r.Get("/", productTransport.GetProduct)     
+	router.Route("/product", func(r chi.Router) {
+		r.Route("/{productId}", func(r chi.Router) {
+			r.Use(productTransport.ProductCtx)
+			r.Get("/", productTransport.GetProduct)
+		})
 	})
+	// router.Use(ProductCtx).Get("/", productTransport.GetProduct)
 	// router.Put("/product/{id}", putHandler)
 	// router.Delete("/product/{id}", deleteHandler)
 	port := ":8000"
