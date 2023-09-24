@@ -15,7 +15,7 @@ type ProductTransport struct {
 	log *zap.Logger
 }
 
-func newProductTransport(log *zap.Logger) ProductTransport {
+func NewProductTransport(log *zap.Logger) ProductTransport {
 	return ProductTransport{
 		log: log,
 	}
@@ -32,17 +32,22 @@ func (t *ProductTransport) ProductCtx(next http.Handler) http.Handler {
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
 	foundProducts, err := json.Marshal(products)
+
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
 	}
+
 	w.Write(foundProducts)
 }
 
 func AddProduct(w http.ResponseWriter, r *http.Request) {
     reqBody, _ := ioutil.ReadAll(r.Body)
+
 	var newProduct *Product
+
 	json.Unmarshal(reqBody, &newProduct)
 	products = append(products, newProduct)
+
 	json.NewEncoder(w).Encode(newProduct)
 }
 
@@ -77,6 +82,7 @@ func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
     id := "3"
+
     for index, product := range products {
         if product.ID == id {
             products = append(products[:index], products[index+1:]...)
@@ -86,7 +92,9 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := "2"
+
 	reqBody, _ := ioutil.ReadAll(r.Body)
+
 	var newProduct *Product
 	json.Unmarshal(reqBody, &newProduct)
 

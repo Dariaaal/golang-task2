@@ -13,9 +13,10 @@ func GetRouter() {
 
 	logger.Debug("starting server")
 
-	productTransport := newProductTransport(logger)
+	productTransport := NewProductTransport(logger)
 
 	router := chi.NewRouter()
+
 	router.Get("/products", GetProducts)
 	router.Post("/products", AddProduct)
 	router.Route("/product", func(r chi.Router) {
