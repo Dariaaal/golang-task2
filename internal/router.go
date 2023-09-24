@@ -22,12 +22,11 @@ func GetRouter() {
 		r.Route("/{productId}", func(r chi.Router) {
 			r.Use(productTransport.ProductCtx)
 			r.Get("/", productTransport.GetProduct)
+			r.Put("/", UpdateProduct)
+			r.Delete("/", DeleteProduct)
 		})
 	})
-	// router.Use(ProductCtx).Get("/", productTransport.GetProduct)
 
-	// router.Put("/product/{id}", putHandler)
-	// router.Delete("/product/{id}", deleteHandler)
 	port := ":8000"
 
 	logger.Debug("server is listening", zap.String("port", port))

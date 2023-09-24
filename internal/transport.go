@@ -48,19 +48,19 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
 
 func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
-	rowProductID := r.Context().Value("id")
+	rowProductID := "2"
 
-	if rowProductID == nil {
-		http.Error(w, http.StatusText(400), 400)
-		return
-	}
+	// if rowProductID == nil {
+	// 	http.Error(w, http.StatusText(400), 400)
+	// 	return
+	// }
 
-	productId := rowProductID.(string)
+	// productId := rowProductID.(string)
 
-	t.log.Debug("get product", zap.String("id", productId))
+	t.log.Debug("get product", zap.String("id", rowProductID))
 
 	for _, product := range products {
-		if product.ID == productId {
+		if product.ID == rowProductID {
 			responseData, err := json.Marshal(product)
 			if err != nil {
 				http.Error(w, http.StatusText(400), 400)
@@ -75,30 +75,29 @@ func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(400), 400)
 }
 
-// func UpdateProduct(w http.ResponseWriter, r *http.Request) {
-//     var product Product
-//     id := chi.URLParam(r, "id")
-//     json.NewDecoder(r.Body).Decode(&post)
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+    id := "3"
+    for index, product := range products {
+        if product.ID == id {
+            products = append(products[:index], products[index+1:]...)
+        }
+    }
+}
 
-//     query, err := db.Prepare("Update posts set title=?, content=? where id=?")
-//     catch(err)
-//     _, er := query.Exec(post.Title, post.Content, id)
-//     catch(er)
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	id := "2"
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var newProduct *Product
+	json.Unmarshal(reqBody, &newProduct)
 
-//     defer query.Close()
+	for index, product := range products {
+        if product.ID == id {
+            product.Cover = newProduct.Cover
+			product.Title = newProduct.Title
+			product.Description = newProduct.Description
+			product.Price = newProduct.Price
 
-//     respondwithJSON(w, http.StatusOK, map[string]string{"message": "update successfully"})
-
-// }
-
-// func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-//     id := chi.URLParam(r, "id")
-
-//     query, err := db.Prepare("delete from posts where id=?")
-//     catch(err)
-//     _, er := query.Exec(id)
-//     catch(er)
-//     query.Close()
-
-//     respondwithJSON(w, http.StatusOK, map[string]string{"message": "successfully deleted"})
-// }
+			products[index] = product
+        }
+    }
+}
