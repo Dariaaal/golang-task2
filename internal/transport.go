@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 
 	"net/http"
 
@@ -27,6 +28,22 @@ func (t *ProductTransport) ProductCtx(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), "id", productID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	foundProducts, err := json.Marshal(products)
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+	}
+	w.Write(foundProducts)
+}
+
+func AddProduct(w http.ResponseWriter, r *http.Request) {
+    reqBody, _ := ioutil.ReadAll(r.Body)
+	var newProduct *Product
+	json.Unmarshal(reqBody, &newProduct)
+	products = append(products, newProduct)
+	json.NewEncoder(w).Encode(newProduct)
 }
 
 func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
