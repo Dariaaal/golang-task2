@@ -1,5 +1,13 @@
 package internal
 
+type Storage interface {
+	GetProducts() *[]Product
+	GetProduct() *Product
+	AddProduct() *Product
+	UpdateProduct() *Product
+	DeleteProduct() error
+}
+
 var products = []*Product{
 	{
 		ID: "2",
@@ -22,3 +30,4 @@ var products = []*Product{
 		Price:       1699,
 	},
 }
+

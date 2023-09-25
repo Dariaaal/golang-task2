@@ -1,16 +1,28 @@
 package main
 
 import (
-	"github.com/dariaaal/golang-task2/internal"
-	// "github.com/dariaaal/golang-task2/pkg/handler"
-	// "github.com/dariaaal/golang-task2/pkg/repository"
-	// "github.com/dariaaal/golang-task2/pkg/service"
+	"net/http"
+
+	"github.com/dariaaal/golang-task2/internal/domain/product"
+	"go.uber.org/zap"
 )
 
 func main() {
-	// repos := repository.NewRepository()
-	// services := service.NewService(repos)
-	// handlers := handler.NewHandler(services)
 
-	internal.GetRouter()
+	logger, _ := zap.NewDevelopment()
+
+	logger.Debug("starting server")
+
+	// internal.GetRoutes()
+
+	// create handler and use productTransport.GetRoutes()
+
+	port := ":8000"
+
+	logger.Debug("server is listening", zap.String("port", port))
+
+	err := http.ListenAndServe(port, internal.GetRoutes())
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 }
