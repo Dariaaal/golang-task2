@@ -33,7 +33,7 @@ func GetRoutes(router chi.Router) {
 	router.Route("/{productId}", func(r chi.Router) {
 		r.Use(productTransport.ProductCtx)
 		r.Get("/", productTransport.GetProduct)
-		// r.Put("/", productTransport.UpdateProduct)
+		r.Put("/", productTransport.UpdateProduct)
 		r.Delete("/", productTransport.DeleteProduct)
 	})
 
@@ -94,29 +94,16 @@ func (t *ProductTransport) DeleteProduct(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-// func (t *ProductTransport) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-// 	rowProductID := r.Context().Value("id")
+func (t *ProductTransport) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
 
-// 	if rowProductID == nil {
-// 		http.Error(w, http.StatusText(400), 400)
-// 		return
-// 	}
+	var newProduct Product
 
-// 	productId := rowProductID.(string)
-
-// 	reqBody, _ := ioutil.ReadAll(r.Body)
-
-// 	var newProduct *Product
-// 	json.Unmarshal(reqBody, &newProduct)
-
-// 	for index, product := range products {
-// 		if product.ID == productId {
-// 			product.Cover = newProduct.Cover
-// 			product.Title = newProduct.Title
-// 			product.Description = newProduct.Description
-// 			product.Price = newProduct.Price
-
-// 			products[index] = product
-// 		}
-// 	}
-// }
+	json.Unmarshal(reqBody, &newProduct)
+	err := NewService(t.repo).UpdateProduct(r.Context(), newProduct)
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

@@ -4,7 +4,7 @@ type ProductStorage interface {
 	GetAll() *[]Product
 	GetById(id string) *Product
 	Add(newProduct Product) *Product
-	// UpdateProduct() *Product
+	Update(id string, newProduct Product) *Product
 	DeleteById(id string) error
 }
 
@@ -37,6 +37,20 @@ func (s *InMemoryStorage) DeleteById(id string) error {
 		}
 	}
 
+	return nil
+}
+
+func (s *InMemoryStorage) Update(id string, newProduct Product) *Product {
+	for index, product := range s.data {
+		if product.ID == id {
+			product.Cover = newProduct.Cover
+			product.Title = newProduct.Title
+			product.Description = newProduct.Description
+			product.Price = newProduct.Price
+
+			s.data[index] = product
+		}
+	}
 	return nil
 }
 
