@@ -102,12 +102,13 @@ func (t *ProductTransport) UpdateProduct(w http.ResponseWriter, r *http.Request)
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
 	var newProduct Product
-
-	json.Unmarshal(reqBody, &newProduct)
-	err := NewService(t.repo).UpdateProduct(r.Context(), newProduct)
+	product, err := NewService(t.repo).UpdateProduct(r.Context(), newProduct)
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
 		return
-	}
+	} 
+
+	json.Unmarshal(reqBody, &product)
+
 	w.WriteHeader(http.StatusOK)
 }

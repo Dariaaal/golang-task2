@@ -9,7 +9,7 @@ type ProductService interface {
 	GetAll() *[]Product
 	GetById(ctx context.Context) (*Product, error)
 	Add(newProduct Product) *Product
-	UpdateProduct(ctx context.Context, newProduct Product) *Product
+	UpdateProduct(ctx context.Context, newProduct Product) (*Product, error)
 	Delete(ctx context.Context) error
 }
 
@@ -52,10 +52,13 @@ func (s *service) GetAll() *[]Product {
 	return s.storage.GetAll()
 }
 
-func (s *service) UpdateProduct(ctx context.Context, newProduct Product) *Product {
+func (s *service) UpdateProduct(ctx context.Context, newProduct Product) (*Product, error) {
 	rowProductID := ctx.Value("id")
+	if rowProductID == nil {
+		return nil, errors.New("empty product id")
+	}
 
 	productId := rowProductID.(string)
 
-	return s.storage.Update(productId, newProduct)
+	return s.storage.Update(productId, newProduct), nil
 }
