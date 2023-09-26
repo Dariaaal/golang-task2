@@ -72,11 +72,15 @@ func (t *ProductTransport) AddProduct(w http.ResponseWriter, r *http.Request) {
 
 func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
-	productId := NewService(t.repo).GetById(r.Context()).ID
+	product, err := NewService(t.repo).GetById(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
+	}
 
-	t.log.Debug("get product", zap.String("id", productId))
+	t.log.Debug("get product", zap.String("id", product.ID))
 
-	responseData, err := json.Marshal(NewService(t.repo).GetById(r.Context()))
+	responseData, err := json.Marshal(product)
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
 		return
