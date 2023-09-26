@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/dariaaal/golang-task2/internal/domain/product"
+	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
@@ -13,15 +14,14 @@ func main() {
 
 	logger.Debug("starting server")
 
-	// internal.GetRoutes()
-
-	// create handler and use productTransport.GetRoutes()
+	router := chi.NewRouter()
+	router.Route("/product", internal.GetRoutes)
 
 	port := ":8000"
 
 	logger.Debug("server is listening", zap.String("port", port))
 
-	err := http.ListenAndServe(port, internal.GetRoutes())
+	err := http.ListenAndServe(port, router)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

@@ -1,37 +1,54 @@
 package internal
 
-type Service interface {
-	GetProducts() *[]Product
-	GetProduct() *Product
-	AddProduct() *Product
-	UpdateProduct() *Product
-	DeleteProduct() error
+import (
+	"context"
+	"errors"
+)
+
+type ProductService interface {
+	GetAll() *[]Product
+	GetById(ctx context.Context) *Product
+	Add(newProduct Product) *Product
+	// UpdateProduct() *Product
+	Delete(ctx context.Context) error
 }
 
 type service struct {
-	storage Storage
+	storage ProductStorage
 }
 
-func NewRepository(storage Storage) Service {
+func NewService(storage ProductStorage) ProductService {
 	return &service{storage: storage}
 }
 
-func (*service) AddProduct() *Product{
-	return nil
+func (s *service) Add(newProduct Product) *Product {
+	return s.storage.Add(newProduct)
 }
 
-func (s *service) DeleteProduct() error {
-	return nil
+func (s *service) Delete(ctx context.Context) error {
+	rowProductID := ctx.Value("id")
+
+	if rowProductID == nil {
+		return errors.New("empty product id")
+	}
+
+	productId := rowProductID.(string)
+
+	return s.storage.DeleteById(productId)
 }
 
-func (s *service) GetProduct() *Product{
-	return s.storage.GetProduct()
+func (s *service) GetById(ctx context.Context) *Product {
+	rowProductID := ctx.Value("id")
+
+	productId := rowProductID.(string)
+
+	return s.storage.GetById(productId)
 }
 
-func (s *service) GetProducts() *[]Product {
-	return s.storage.GetProducts()
+func (s *service) GetAll() *[]Product {
+	return s.storage.GetAll()
 }
 
-func (s *service) UpdateProduct() *Product {
-	return nil
-}
+// func (s *service) UpdateProduct() *Product {
+// 	return nil
+// }

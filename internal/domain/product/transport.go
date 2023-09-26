@@ -7,39 +7,36 @@ import (
 
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
 type ProductTransport struct {
-	log *zap.Logger
+	log  *zap.Logger
+	repo ProductStorage
 }
 
 func NewProductTransport(log *zap.Logger) ProductTransport {
 	return ProductTransport{
-		log: log,
+		log:  log,
+		repo: NewInMemoryStorage(),
 	}
 }
 
-func GetRoutes() *chi.Mux {
-	router := chi.NewRouter()
-
+func GetRoutes(router chi.Router) {
 	logger, _ := zap.NewDevelopment()
 
 	productTransport := NewProductTransport(logger)
 
-	router.Route("/product", func(r chi.Router) {
-		router.Get("/", productTransport.GetProduct)
-		router.Post("/", productTransport.AddProduct)
-		r.Route("/{productId}", func(r chi.Router) {
-			r.Use(productTransport.ProductCtx)
-			r.Get("/", productTransport.GetProduct)
-			r.Put("/", productTransport.UpdateProduct)
-			r.Delete("/", productTransport.DeleteProduct)
-		})
+	router.Get("/all", productTransport.GetProducts)
+	router.Post("/", productTransport.AddProduct)
+	router.Route("/{productId}", func(r chi.Router) {
+		r.Use(productTransport.ProductCtx)
+		r.Get("/", productTransport.GetProduct)
+		// r.Put("/", productTransport.UpdateProduct)
+		r.Delete("/", productTransport.DeleteProduct)
 	})
 
-	return router
 }
 
 func (t *ProductTransport) ProductCtx(next http.Handler) http.Handler {
@@ -52,7 +49,7 @@ func (t *ProductTransport) ProductCtx(next http.Handler) http.Handler {
 }
 
 func (t *ProductTransport) GetProducts(w http.ResponseWriter, r *http.Request) {
-	foundProducts, err := json.Marshal(products)
+	foundProducts, err := json.Marshal(t.repo.GetAll())
 
 	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
@@ -62,85 +59,64 @@ func (t *ProductTransport) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *ProductTransport) AddProduct(w http.ResponseWriter, r *http.Request) {
-    reqBody, _ := ioutil.ReadAll(r.Body)
-
+	reqBody, _ := ioutil.ReadAll(r.Body)
 	var newProduct *Product
-
 	json.Unmarshal(reqBody, &newProduct)
-	products = append(products, newProduct)
-
-	json.NewEncoder(w).Encode(newProduct)
+	err := NewService(t.repo).Add(*newProduct)
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (t *ProductTransport) GetProduct(w http.ResponseWriter, r *http.Request) {
 
-	rowProductID := r.Context().Value("id")
-
-	if rowProductID == nil {
-		http.Error(w, http.StatusText(400), 400)
-		return
-	}
-
-	productId := rowProductID.(string)
+	productId := NewService(t.repo).GetById(r.Context()).ID
 
 	t.log.Debug("get product", zap.String("id", productId))
 
-	for _, product := range products {
-		if product.ID == productId {
-			responseData, err := json.Marshal(product)
-			if err != nil {
-				http.Error(w, http.StatusText(400), 400)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			w.Write(responseData)
-			return
-		}
+	responseData, err := json.Marshal(NewService(t.repo).GetById(r.Context()))
+	if err != nil {
+		http.Error(w, http.StatusText(400), 400)
+		return
 	}
-
-	http.Error(w, http.StatusText(400), 400)
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseData)
 }
 
 func (t *ProductTransport) DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	rowProductID := r.Context().Value("id")
-
-	if rowProductID == nil {
+	err := NewService(t.repo).Delete(r.Context())
+	if err != nil {
 		http.Error(w, http.StatusText(400), 400)
 		return
 	}
-
-	productId := rowProductID.(string)
-
-    for index, product := range products {
-        if product.ID == productId {
-            products = append(products[:index], products[index+1:]...)
-        }
-    }
+	w.WriteHeader(http.StatusOK)
 }
 
-func (t *ProductTransport) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	rowProductID := r.Context().Value("id")
+// func (t *ProductTransport) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+// 	rowProductID := r.Context().Value("id")
 
-	if rowProductID == nil {
-		http.Error(w, http.StatusText(400), 400)
-		return
-	}
+// 	if rowProductID == nil {
+// 		http.Error(w, http.StatusText(400), 400)
+// 		return
+// 	}
 
-	productId := rowProductID.(string)
+// 	productId := rowProductID.(string)
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+// 	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var newProduct *Product
-	json.Unmarshal(reqBody, &newProduct)
+// 	var newProduct *Product
+// 	json.Unmarshal(reqBody, &newProduct)
 
-	for index, product := range products {
-        if product.ID == productId {
-            product.Cover = newProduct.Cover
-			product.Title = newProduct.Title
-			product.Description = newProduct.Description
-			product.Price = newProduct.Price
+// 	for index, product := range products {
+// 		if product.ID == productId {
+// 			product.Cover = newProduct.Cover
+// 			product.Title = newProduct.Title
+// 			product.Description = newProduct.Description
+// 			product.Price = newProduct.Price
 
-			products[index] = product
-        }
-    }
-}
+// 			products[index] = product
+// 		}
+// 	}
+// }
